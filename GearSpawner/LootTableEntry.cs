@@ -1,6 +1,6 @@
 ﻿namespace GearSpawner
 {
-	internal class LootTableEntry
+	public class LootTableEntry
 	{
 		public string PrefabName;
 		public int Weight;

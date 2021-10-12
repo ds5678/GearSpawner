@@ -1,17 +1,14 @@
 ﻿using MelonLoader;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace GearSpawner
 {
-	public static class GearSpawnManager
+	internal static class GearSpawnManager
 	{
 		private static Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new Dictionary<string, List<GearSpawnInfo>>();
 
-		public static event System.Action<GearItem[]> OnSpawnGearItems;
-
-		public static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo)
+		internal static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo)
 		{
 			string normalizedSceneName = GetNormalizedSceneName(sceneName);
 			if (!gearSpawnInfos.ContainsKey(normalizedSceneName))
@@ -21,12 +18,6 @@ namespace GearSpawner
 
 			List<GearSpawnInfo> sceneGearSpawnInfos = gearSpawnInfos[normalizedSceneName];
 			sceneGearSpawnInfos.Add(gearSpawnInfo);
-		}
-
-		public static void ParseSpawnInformation(string text)
-		{
-			string[] lines = Regex.Split(text, "\r\n|\r|\n");
-			GearSpawnReader.ProcessLines(lines);
 		}
 
 		private static string GetNormalizedGearName(string gearName)
@@ -64,7 +55,7 @@ namespace GearSpawner
 			stopwatch.Stop();
 			MelonLogger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
 
-			OnSpawnGearItems?.Invoke(spawnedItems);
+			SpawnManager.InvokeEvent(spawnedItems);
 		}
 
 		private static bool IsNonGameScene()
