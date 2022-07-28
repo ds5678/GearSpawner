@@ -1,10 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿extern alias Hinterland;
+using Hinterland;
+using System.Text.RegularExpressions;
 
 namespace GearSpawner
 {
 	public static class SpawnManager
 	{
-		public static event System.Action<GearItem[]> OnSpawnGearItems;
+		public static event System.Action<GearItem[]>? OnSpawnGearItems;
 
 		public static void ParseSpawnInformation(string text)
 		{

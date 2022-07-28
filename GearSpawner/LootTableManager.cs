@@ -1,4 +1,6 @@
-﻿using MelonLoader;
+﻿extern alias Hinterland;
+using Hinterland;
+using MelonLoader;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -48,10 +50,13 @@ namespace GearSpawner
 
 		internal static void ConfigureLootTable(LootTable lootTable)
 		{
-			if (lootTable == null) return;
+			if (lootTable == null)
+			{
+				return;
+			}
 
 			List<LootTableEntry> entries;
-			if (lootTableEntries.TryGetValue(lootTable.name.ToLower(), out entries))
+			if (lootTableEntries.TryGetValue(lootTable.name.ToLowerInvariant(), out entries))
 			{
 				AddEntries(lootTable, entries);
 			}
@@ -74,13 +79,13 @@ namespace GearSpawner
 		{
 			if (lootTable.StartsWith("Loot", System.StringComparison.InvariantCultureIgnoreCase))
 			{
-				return lootTable.ToLower();
+				return lootTable.ToLowerInvariant();
 			}
 			if (lootTable.StartsWith("Cargo", System.StringComparison.InvariantCultureIgnoreCase))
 			{
-				return "loot" + lootTable.ToLower();
+				return "loot" + lootTable.ToLowerInvariant();
 			}
-			return "loottable" + lootTable.ToLower();
+			return "loottable" + lootTable.ToLowerInvariant();
 		}
 
 		private static string NormalizePrefabName(string prefabName)

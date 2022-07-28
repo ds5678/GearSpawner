@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿extern alias Hinterland;
+using Hinterland;
+using HarmonyLib;
 
 namespace GearSpawner
 {
@@ -12,6 +14,7 @@ namespace GearSpawner
 				LootTableManager.ConfigureLootTable(__instance);
 			}
 		}
+		
 		[HarmonyPatch(typeof(LootTable), "GetRandomGearPrefab")]
 		internal static class LootTable_GetRandomGearPrefab
 		{

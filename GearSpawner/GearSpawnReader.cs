@@ -26,13 +26,22 @@ namespace GearSpawner
 
 		private static string GetTrimmedLine(string line)
 		{
-			if (line == null) return "";
-			else return line.Trim().ToLower();
+			if (line == null)
+			{
+				return "";
+			}
+			else
+			{
+				return line.Trim().ToLowerInvariant();
+			}
 		}
 
 		private static float ParseFloat(string value, float defaultValue, string line)
 		{
-			if (string.IsNullOrEmpty(value)) return defaultValue;
+			if (string.IsNullOrEmpty(value))
+			{
+				return defaultValue;
+			}
 
 			try
 			{
@@ -46,7 +55,10 @@ namespace GearSpawner
 
 		private static int ParseInt(string value, int defaultValue, string line)
 		{
-			if (string.IsNullOrEmpty(value)) return defaultValue;
+			if (string.IsNullOrEmpty(value))
+			{
+				return defaultValue;
+			}
 
 			try
 			{
@@ -60,7 +72,10 @@ namespace GearSpawner
 
 		private static Vector3 ParseVector(string value, string line)
 		{
-			if (string.IsNullOrEmpty(value)) return Vector3.zero;
+			if (string.IsNullOrEmpty(value))
+			{
+				return Vector3.zero;
+			}
 
 			string[] components = value.Split(',');
 			if (components.Length != 3)
@@ -77,8 +92,8 @@ namespace GearSpawner
 
 		internal static void ProcessLines(string[] lines)
 		{
-			string scene = null;
-			string loottable = null;
+			string? scene = null;
+			string? loottable = null;
 			string tag = "none";
 
 			foreach (string eachLine in lines)
@@ -123,7 +138,7 @@ namespace GearSpawner
 
 					info.tag = tag + "";
 
-					GearSpawnManager.AddGearSpawnInfo(scene, info);
+					GearSpawnManager.AddGearSpawnInfo(scene!, info);
 					continue;
 				}
 
@@ -146,7 +161,7 @@ namespace GearSpawner
 					LootTableEntry entry = new LootTableEntry();
 					entry.PrefabName = match.Groups[1].Value;
 					entry.Weight = ParseInt(match.Groups[2].Value, 0, eachLine);
-					LootTableManager.AddLootTableEntry(loottable, entry);
+					LootTableManager.AddLootTableEntry(loottable!, entry);
 					continue;
 				}
 

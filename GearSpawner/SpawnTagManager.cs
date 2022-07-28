@@ -10,7 +10,7 @@ namespace GearSpawner
 
 		public static void AddToTaggedFunctions(string tag, Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float> function)
 		{
-			string tagToLower = tag.ToLower();
+			string tagToLower = tag.ToLowerInvariant();
 			if (tagToLower == "none")
 			{
 				MelonLogger.Error("The spawn tag 'None' is reserved for GearSpawner internal workings.");
@@ -20,12 +20,14 @@ namespace GearSpawner
 				MelonLogger.Error("Spawn tag already registered. Overwriting...");
 				taggedFunctions[tagToLower] = function;
 			}
-			else taggedFunctions.Add(tagToLower, function);
+			else
+			{
+				taggedFunctions.Add(tagToLower, function);
+			}
 		}
-		public static Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float> GetTaggedFunction(string tag)
+		public static Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float>? GetTaggedFunction(string tag)
 		{
-			if (taggedFunctions.ContainsKey(tag)) return taggedFunctions[tag];
-			else return null;
+			return taggedFunctions.ContainsKey(tag) ? taggedFunctions[tag] : null;
 		}
 		public static bool ContainsTag(string tag) => taggedFunctions.ContainsKey(tag);
 	}

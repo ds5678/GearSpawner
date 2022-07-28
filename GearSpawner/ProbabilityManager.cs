@@ -1,4 +1,6 @@
-﻿using System;
+﻿extern alias Hinterland;
+using Hinterland;
+using System;
 using UnityEngine;
 
 namespace GearSpawner
@@ -7,7 +9,10 @@ namespace GearSpawner
 	{
 		internal static float GetAdjustedProbability(GearSpawnInfo gearSpawnInfo)
 		{
-			if (Settings.instance.alwaysSpawnItems) return 100f; //overrides everything else
+			if (Settings.instance.alwaysSpawnItems)
+			{
+				return 100f; //overrides everything else
+			}
 
 			DifficultyLevel difficultyLevel = GetDifficultyLevel();
 			FirearmAvailability firearmAvailability = GetFirearmAvailability();
@@ -16,39 +21,39 @@ namespace GearSpawner
 			{
 				return SpawnTagManager.GetTaggedFunction(gearSpawnInfo.tag).Invoke(difficultyLevel, firearmAvailability, gearSpawnInfo);
 			}
-			else return GetAdjustedProbability(difficultyLevel, gearSpawnInfo.SpawnChance);
+			else
+			{
+				return GetAdjustedProbability(difficultyLevel, gearSpawnInfo.SpawnChance);
+			}
 		}
 
 		private static float GetAdjustedProbability(DifficultyLevel difficultyLevel, float baseProbability)
 		{
-			float multiplier = 1f;
-			switch (difficultyLevel)
+			var multiplier = difficultyLevel switch
 			{
-				case DifficultyLevel.Pilgram:
-					multiplier = Math.Max(0f, Settings.instance.pilgramSpawnProbabilityMultiplier);
-					break;
-				case DifficultyLevel.Voyager:
-					multiplier = Math.Max(0f, Settings.instance.voyagerSpawnProbabilityMultiplier);
-					break;
-				case DifficultyLevel.Stalker:
-					multiplier = Math.Max(0f, Settings.instance.stalkerSpawnProbabilityMultiplier);
-					break;
-				case DifficultyLevel.Interloper:
-					multiplier = Math.Max(0f, Settings.instance.interloperSpawnProbabilityMultiplier);
-					break;
-				case DifficultyLevel.Storymode:
-					multiplier = Math.Max(0f, Settings.instance.storySpawnProbabilityMultiplier);
-					break;
-				case DifficultyLevel.Challenge:
-					multiplier = Math.Max(0f, Settings.instance.challengeSpawnProbabilityMultiplier);
-					break;
+				DifficultyLevel.Pilgram => Math.Max(0f, Settings.instance.pilgramSpawnProbabilityMultiplier),
+				DifficultyLevel.Voyager => Math.Max(0f, Settings.instance.voyagerSpawnProbabilityMultiplier),
+				DifficultyLevel.Stalker => Math.Max(0f, Settings.instance.stalkerSpawnProbabilityMultiplier),
+				DifficultyLevel.Interloper => Math.Max(0f, Settings.instance.interloperSpawnProbabilityMultiplier),
+				DifficultyLevel.Storymode => Math.Max(0f, Settings.instance.storySpawnProbabilityMultiplier),
+				DifficultyLevel.Challenge => Math.Max(0f, Settings.instance.challengeSpawnProbabilityMultiplier),
+				_ => 1f,
+			};
+			if (multiplier == 0f)
+			{
+				return 0f; //can disable spawns for a game mode
 			}
-			if (multiplier == 0f) return 0f; //can disable spawns for a game mode
 
 			float clampedProbability = Mathf.Clamp(baseProbability, 0f, 100f);//just to be safe
 
-			if (clampedProbability == 100f) return 100f; //for guaranteed spawns
-			else return Mathf.Clamp(multiplier * clampedProbability, 0f, 100f); //for normal spawns
+			if (clampedProbability == 100f)
+			{
+				return 100f; //for guaranteed spawns
+			}
+			else
+			{
+				return Mathf.Clamp(multiplier * clampedProbability, 0f, 100f); //for normal spawns
+			}
 		}
 
 		public static DifficultyLevel GetDifficultyLevel()
@@ -58,84 +63,79 @@ namespace GearSpawner
 				return DifficultyLevel.Storymode;
 			}
 			ExperienceModeType experienceModeType = ExperienceModeManager.GetCurrentExperienceModeType();
-			switch (experienceModeType)
+			return experienceModeType switch
 			{
-				case ExperienceModeType.Pilgrim:
-					return DifficultyLevel.Pilgram;
-				case ExperienceModeType.Voyageur:
-					return DifficultyLevel.Voyager;
-				case ExperienceModeType.Stalker:
-					return DifficultyLevel.Stalker;
-				case ExperienceModeType.Interloper:
-					return DifficultyLevel.Interloper;
-				case ExperienceModeType.Custom:
-					return GetCustomDifficultyLevel();
-
-				case ExperienceModeType.ChallengeArchivist:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeDeadManWalking:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeHunted:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeHuntedPart2:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeNomad:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeNowhereToHide:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeRescue:
-					return DifficultyLevel.Challenge;
-				case ExperienceModeType.ChallengeWhiteout:
-					return DifficultyLevel.Challenge;
-				default:
-					return DifficultyLevel.Other;
-			}
+				ExperienceModeType.Pilgrim => DifficultyLevel.Pilgram,
+				ExperienceModeType.Voyageur => DifficultyLevel.Voyager,
+				ExperienceModeType.Stalker => DifficultyLevel.Stalker,
+				ExperienceModeType.Interloper => DifficultyLevel.Interloper,
+				ExperienceModeType.Custom => GetCustomDifficultyLevel(),
+				ExperienceModeType.ChallengeArchivist => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeDeadManWalking => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeHunted => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeHuntedPart2 => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeNomad => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeNowhereToHide => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeRescue => DifficultyLevel.Challenge,
+				ExperienceModeType.ChallengeWhiteout => DifficultyLevel.Challenge,
+				_ => DifficultyLevel.Other,
+			};
 		}
 
 		private static DifficultyLevel GetCustomDifficultyLevel()
 		{
-			switch (GameManager.GetCustomMode().m_BaseWorldDifficulty)
+			return GameManager.GetCustomMode().m_BaseWorldDifficulty switch
 			{
-				case CustomExperienceModeManager.CustomTunableLMHV.VeryHigh:
-					return DifficultyLevel.Pilgram;
-				case CustomExperienceModeManager.CustomTunableLMHV.High:
-					return DifficultyLevel.Voyager;
-				case CustomExperienceModeManager.CustomTunableLMHV.Medium:
-					return DifficultyLevel.Stalker;
-				case CustomExperienceModeManager.CustomTunableLMHV.Low:
-					return DifficultyLevel.Interloper;
-				default:
-					return DifficultyLevel.Other;
-			}
+				CustomExperienceModeManager.CustomTunableLMHV.VeryHigh => DifficultyLevel.Pilgram,
+				CustomExperienceModeManager.CustomTunableLMHV.High => DifficultyLevel.Voyager,
+				CustomExperienceModeManager.CustomTunableLMHV.Medium => DifficultyLevel.Stalker,
+				CustomExperienceModeManager.CustomTunableLMHV.Low => DifficultyLevel.Interloper,
+				_ => DifficultyLevel.Other,
+			};
 		}
 
 		public static FirearmAvailability GetFirearmAvailability()
 		{
 			if (GameManager.IsStoryMode())
 			{
-				if (SaveGameSystem.m_CurrentEpisode == Episode.One || SaveGameSystem.m_CurrentEpisode == Episode.Two) return FirearmAvailability.Rifle;
-				else return FirearmAvailability.All;
+				if (SaveGameSystem.m_CurrentEpisode == Episode.One || SaveGameSystem.m_CurrentEpisode == Episode.Two)
+				{
+					return FirearmAvailability.Rifle;
+				}
+				else
+				{
+					return FirearmAvailability.All;
+				}
 			}
 			ExperienceModeType experienceModeType = ExperienceModeManager.GetCurrentExperienceModeType();
-			switch (experienceModeType)
+			return experienceModeType switch
 			{
-				case ExperienceModeType.Interloper:
-					return FirearmAvailability.None;
-				case ExperienceModeType.Custom:
-					return GetCustomFirearmAvailability();
-				default:
-					return FirearmAvailability.All;
-			}
+				ExperienceModeType.Interloper => FirearmAvailability.None,
+				ExperienceModeType.Custom => GetCustomFirearmAvailability(),
+				_ => FirearmAvailability.All,
+			};
 		}
 
 		private static FirearmAvailability GetCustomFirearmAvailability()
 		{
 			bool revolvers = GameManager.GetCustomMode().m_RevolversInWorld;
 			bool rifles = GameManager.GetCustomMode().m_RiflesInWorld;
-			if (revolvers && rifles) return FirearmAvailability.All;
-			else if (revolvers) return FirearmAvailability.Revolver;
-			else if (rifles) return FirearmAvailability.Rifle;
-			else return FirearmAvailability.None;
+			if (revolvers && rifles)
+			{
+				return FirearmAvailability.All;
+			}
+			else if (revolvers)
+			{
+				return FirearmAvailability.Revolver;
+			}
+			else if (rifles)
+			{
+				return FirearmAvailability.Rifle;
+			}
+			else
+			{
+				return FirearmAvailability.None;
+			}
 		}
 	}
 }
