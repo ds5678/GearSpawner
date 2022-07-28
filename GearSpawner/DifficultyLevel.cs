@@ -1,13 +1,12 @@
-﻿namespace GearSpawner
+﻿namespace GearSpawner;
+
+public enum DifficultyLevel
 {
-	public enum DifficultyLevel
-	{
-		Pilgram,
-		Voyager,
-		Stalker,
-		Interloper,
-		Challenge,
-		Storymode,
-		Other
-	}
+	Pilgram,
+	Voyager,
+	Stalker,
+	Interloper,
+	Challenge,
+	Storymode,
+	Other
 }

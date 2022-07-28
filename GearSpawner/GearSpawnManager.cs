@@ -5,117 +5,116 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace GearSpawner
+namespace GearSpawner;
+
+internal static class GearSpawnManager
 {
-	internal static class GearSpawnManager
+	private static Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new Dictionary<string, List<GearSpawnInfo>>();
+
+	internal static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo)
 	{
-		private static Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new Dictionary<string, List<GearSpawnInfo>>();
-
-		internal static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo)
+		string normalizedSceneName = GetNormalizedSceneName(sceneName);
+		if (!gearSpawnInfos.ContainsKey(normalizedSceneName))
 		{
-			string normalizedSceneName = GetNormalizedSceneName(sceneName);
-			if (!gearSpawnInfos.ContainsKey(normalizedSceneName))
-			{
-				gearSpawnInfos.Add(normalizedSceneName, new List<GearSpawnInfo>());
-			}
-
-			List<GearSpawnInfo> sceneGearSpawnInfos = gearSpawnInfos[normalizedSceneName];
-			sceneGearSpawnInfos.Add(gearSpawnInfo);
+			gearSpawnInfos.Add(normalizedSceneName, new List<GearSpawnInfo>());
 		}
 
-		private static string? GetNormalizedGearName(string gearName)
+		List<GearSpawnInfo> sceneGearSpawnInfos = gearSpawnInfos[normalizedSceneName];
+		sceneGearSpawnInfos.Add(gearSpawnInfo);
+	}
+
+	private static string? GetNormalizedGearName(string gearName)
+	{
+		if (gearName != null && !gearName.ToLowerInvariant().StartsWith("gear_"))
 		{
-			if (gearName != null && !gearName.ToLowerInvariant().StartsWith("gear_"))
-			{
-				return "gear_" + gearName;
-			}
-			else
-			{
-				return gearName;
-			}
+			return "gear_" + gearName;
+		}
+		else
+		{
+			return gearName;
+		}
+	}
+
+	private static string GetNormalizedSceneName(string sceneName) => sceneName.ToLowerInvariant();
+
+	private static IEnumerable<GearSpawnInfo> GetSpawnInfos(string sceneName)
+	{
+		if (gearSpawnInfos.TryGetValue(sceneName, out List<GearSpawnInfo> result))
+		{
+			MelonLogger.Msg($"Found {result.Count} spawn entries for '{sceneName}'");
+			return result;
+		}
+		else
+		{
+			MelonLogger.Msg($"Could not find any spawn entries for '{sceneName}'");
+			return Enumerable.Empty<GearSpawnInfo>();
+		}
+	}
+
+	internal static void PrepareScene()
+	{
+		if (IsNonGameScene())
+		{
+			return;
 		}
 
-		private static string GetNormalizedSceneName(string sceneName) => sceneName.ToLowerInvariant();
+		string sceneName = GameManager.m_ActiveScene;
+		MelonLogger.Msg($"Spawning items for scene '{sceneName}' ...");
+		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+		stopwatch.Start();
 
-		private static IEnumerable<GearSpawnInfo> GetSpawnInfos(string sceneName)
+		GearItem[] spawnedItems = SpawnGearForScene(GetNormalizedSceneName(sceneName));
+
+		stopwatch.Stop();
+		MelonLogger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
+
+		SpawnManager.InvokeEvent(spawnedItems);
+	}
+
+	private static bool IsNonGameScene()
+	{
+		return string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene == "MainMenu" || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty";
+	}
+
+	/// <summary>
+	/// Spawns the items into the scene. However, this can be overwritten by deserialization
+	/// </summary>
+	/// <param name="sceneName"></param>
+	private static GearItem[] SpawnGearForScene(string sceneName)
+	{
+		IEnumerable<GearSpawnInfo> sceneGearSpawnInfos = GetSpawnInfos(sceneName);
+		if (sceneGearSpawnInfos == null)
 		{
-			if (gearSpawnInfos.TryGetValue(sceneName, out List<GearSpawnInfo> result))
-			{
-				MelonLogger.Msg($"Found {result.Count} spawn entries for '{sceneName}'");
-				return result;
-			}
-			else
-			{
-				MelonLogger.Msg($"Could not find any spawn entries for '{sceneName}'");
-				return Enumerable.Empty<GearSpawnInfo>();
-			}
+			return new GearItem[0];
 		}
 
-		internal static void PrepareScene()
+		List<GearItem> spawnedItems = new List<GearItem>();
+
+		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
-			if (IsNonGameScene())
+			string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
+			Object prefab = Resources.Load(normalizedGearName);
+
+			if (prefab == null)
 			{
-				return;
+				MelonLogger.Warning("Could not find prefab '{0}' to spawn in scene '{1}'.", eachGearSpawnInfo.PrefabName, sceneName);
+				continue;
 			}
 
-			string sceneName = GameManager.m_ActiveScene;
-			MelonLogger.Msg($"Spawning items for scene '{sceneName}' ...");
-			System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-			stopwatch.Start();
-
-			GearItem[] spawnedItems = SpawnGearForScene(GetNormalizedSceneName(sceneName));
-
-			stopwatch.Stop();
-			MelonLogger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
-
-			SpawnManager.InvokeEvent(spawnedItems);
-		}
-
-		private static bool IsNonGameScene()
-		{
-			return string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene == "MainMenu" || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty";
-		}
-
-		/// <summary>
-		/// Spawns the items into the scene. However, this can be overwritten by deserialization
-		/// </summary>
-		/// <param name="sceneName"></param>
-		private static GearItem[] SpawnGearForScene(string sceneName)
-		{
-			IEnumerable<GearSpawnInfo> sceneGearSpawnInfos = GetSpawnInfos(sceneName);
-			if (sceneGearSpawnInfos == null)
+			float spawnProbability = ProbabilityManager.GetAdjustedProbability(eachGearSpawnInfo);
+			if (RandomUtils.RollChance(spawnProbability))
 			{
-				return new GearItem[0];
-			}
-
-			List<GearItem> spawnedItems = new List<GearItem>();
-
-			foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
-			{
-				string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
-				Object prefab = Resources.Load(normalizedGearName);
-
-				if (prefab == null)
+				GameObject gear = Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
+				gear.name = prefab.name;
+				DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
+				if (xpmode != null)
 				{
-					MelonLogger.Warning("Could not find prefab '{0}' to spawn in scene '{1}'.", eachGearSpawnInfo.PrefabName, sceneName);
-					continue;
+					Object.Destroy(xpmode);
 				}
 
-				float spawnProbability = ProbabilityManager.GetAdjustedProbability(eachGearSpawnInfo);
-				if (RandomUtils.RollChance(spawnProbability))
-				{
-					GameObject gear = Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
-					gear.name = prefab.name;
-					DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
-					if (xpmode != null)
-					{
-						Object.Destroy(xpmode);
-					}
-
-					spawnedItems.Add(gear.GetComponent<GearItem>());
-				}
+				spawnedItems.Add(gear.GetComponent<GearItem>());
 			}
-			return spawnedItems.ToArray();
 		}
+		return spawnedItems.ToArray();
 	}
 }

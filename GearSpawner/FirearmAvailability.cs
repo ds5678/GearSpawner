@@ -1,11 +1,10 @@
-﻿namespace GearSpawner
+﻿namespace GearSpawner;
+
+[System.Flags]
+public enum FirearmAvailability
 {
-	[System.Flags]
-	public enum FirearmAvailability
-	{
-		None,
-		Revolver,
-		Rifle,
-		All
-	}
+	None,
+	Revolver,
+	Rifle,
+	All
 }

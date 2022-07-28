@@ -1,8 +1,7 @@
-﻿namespace GearSpawner
+﻿namespace GearSpawner;
+
+public class LootTableEntry
 {
-	public class LootTableEntry
-	{
-		public string PrefabName;
-		public int Weight;
-	}
+	public string PrefabName;
+	public int Weight;
 }

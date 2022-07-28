@@ -1,12 +1,11 @@
 ﻿using MelonLoader;
 
-namespace GearSpawner
-{
+namespace GearSpawner;
+
     internal class GearSpawnerMod : MelonMod
     {
-		public override void OnApplicationStart()
-		{
-			Settings.instance.AddToModSettings("Gear Spawn Settings");
-		}
+	public override void OnApplicationStart()
+	{
+		Settings.instance.AddToModSettings("Gear Spawn Settings");
 	}
 }

@@ -1,10 +1,9 @@
 ﻿using System;
 
-namespace GearSpawner
+namespace GearSpawner;
+
+public sealed class InvalidFormatException : Exception
 {
-	public sealed class InvalidFormatException : Exception
-	{
-		internal InvalidFormatException() : base() { }
-		internal InvalidFormatException(string message) : base(message) { }
-	}
+	internal InvalidFormatException() : base() { }
+	internal InvalidFormatException(string message) : base(message) { }
 }
