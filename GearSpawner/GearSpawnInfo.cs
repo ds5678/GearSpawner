@@ -2,11 +2,6 @@
 
 namespace GearSpawner;
 
-public class GearSpawnInfo
+public readonly record struct GearSpawnInfo(string Tag, Vector3 Position, string PrefabName, Quaternion Rotation, float SpawnChance)
 {
-	public string tag;
-	public Vector3 Position;
-	public string PrefabName;
-	public Quaternion Rotation;
-	public float SpawnChance;
 }

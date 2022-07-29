@@ -128,15 +128,14 @@ internal static class GearSpawnReader
 					throw new InvalidFormatException($"No scene name defined before line '{eachLine}'. Did you forget a 'scene = <SceneName>'?");
 				}
 
-				GearSpawnInfo info = new GearSpawnInfo();
-				info.PrefabName = match.Groups[1].Value;
-
-				info.SpawnChance = ParseFloat(match.Groups[4].Value, 100, eachLine);
-
-				info.Position = ParseVector(match.Groups[2].Value, eachLine);
-				info.Rotation = Quaternion.Euler(ParseVector(match.Groups[3].Value, eachLine));
-
-				info.tag = tag + "";
+				GearSpawnInfo info = new GearSpawnInfo
+				{
+					PrefabName = match.Groups[1].Value,
+					SpawnChance = ParseFloat(match.Groups[4].Value, 100, eachLine),
+					Position = ParseVector(match.Groups[2].Value, eachLine),
+					Rotation = Quaternion.Euler(ParseVector(match.Groups[3].Value, eachLine)),
+					Tag = tag
+				};
 
 				GearSpawnManager.AddGearSpawnInfo(scene!, info);
 				continue;
@@ -158,9 +157,11 @@ internal static class GearSpawnReader
 					throw new InvalidFormatException($"No loottable name defined before line '{eachLine}'. Did you forget a 'loottable = <LootTableName>'?");
 				}
 
-				LootTableEntry entry = new LootTableEntry();
-				entry.PrefabName = match.Groups[1].Value;
-				entry.Weight = ParseInt(match.Groups[2].Value, 0, eachLine);
+				LootTableEntry entry = new()
+				{
+					PrefabName = match.Groups[1].Value,
+					Weight = ParseInt(match.Groups[2].Value, 0, eachLine)
+				};
 				LootTableManager.AddLootTableEntry(loottable!, entry);
 				continue;
 			}

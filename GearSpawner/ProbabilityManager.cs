@@ -17,9 +17,9 @@ internal static class ProbabilityManager
 		DifficultyLevel difficultyLevel = GetDifficultyLevel();
 		FirearmAvailability firearmAvailability = GetFirearmAvailability();
 
-		if (SpawnTagManager.ContainsTag(gearSpawnInfo.tag))
+		if (SpawnTagManager.ContainsTag(gearSpawnInfo.Tag))
 		{
-			return SpawnTagManager.GetTaggedFunction(gearSpawnInfo.tag).Invoke(difficultyLevel, firearmAvailability, gearSpawnInfo);
+			return SpawnTagManager.GetTaggedFunction(gearSpawnInfo.Tag).Invoke(difficultyLevel, firearmAvailability, gearSpawnInfo);
 		}
 		else
 		{
