@@ -19,10 +19,7 @@ internal static class LootTableManager
 			lootTableEntries.Add(normalizedLootTableName, new List<LootTableEntry>());
 		}
 
-		entry.PrefabName = NormalizePrefabName(entry.PrefabName);
-		entry.Weight = Mathf.Clamp(entry.Weight, 0, int.MaxValue);
-
-		lootTableEntries[normalizedLootTableName].Add(entry);
+		lootTableEntries[normalizedLootTableName].Add(entry.Normalize());
 	}
 
 	private static void AddEntries(LootTable lootTable, List<LootTableEntry> entries)
@@ -86,14 +83,5 @@ internal static class LootTableManager
 			return "loot" + lootTable.ToLowerInvariant();
 		}
 		return "loottable" + lootTable.ToLowerInvariant();
-	}
-
-	private static string NormalizePrefabName(string prefabName)
-	{
-		if (!prefabName.StartsWith("gear_", System.StringComparison.InvariantCultureIgnoreCase))
-		{
-			return "gear_" + prefabName;
-		}
-		return prefabName;
 	}
 }
