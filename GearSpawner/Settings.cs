@@ -2,9 +2,9 @@
 
 namespace GearSpawner;
 
-internal class Settings : JsonModSettings
+internal sealed class Settings : JsonModSettings
 {
-	internal static Settings instance = new Settings();
+	internal static Settings Instance { get; } = new();
 
 	[Section("Loose Item Spawn Probability Multipliers")]
 	[Name("Pilgram / Very High Loot Custom")]

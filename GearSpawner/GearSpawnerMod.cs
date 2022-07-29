@@ -6,6 +6,6 @@ namespace GearSpawner;
     {
 	public override void OnApplicationStart()
 	{
-		Settings.instance.AddToModSettings("Gear Spawn Settings");
+		Settings.Instance.AddToModSettings("Gear Spawn Settings");
 	}
 }
