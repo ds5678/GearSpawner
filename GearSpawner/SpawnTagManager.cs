@@ -25,9 +25,9 @@ public static class SpawnTagManager
 			taggedFunctions.Add(tagToLower, function);
 		}
 	}
-	public static Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float>? GetTaggedFunction(string tag)
+	internal static Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float>? GetTaggedFunction(string tag)
 	{
 		return taggedFunctions.ContainsKey(tag) ? taggedFunctions[tag] : null;
 	}
-	public static bool ContainsTag(string tag) => taggedFunctions.ContainsKey(tag);
+	internal static bool ContainsTag(string tag) => taggedFunctions.ContainsKey(tag);
 }
