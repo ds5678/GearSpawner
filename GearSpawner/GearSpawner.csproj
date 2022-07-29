@@ -4,43 +4,60 @@
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<TheLongDarkPath>E:\Games\TLD400</TheLongDarkPath>
+		<MelonLoaderPath>$(TheLongDarkPath)\MelonLoader</MelonLoaderPath>
+		<ManagedPath>$(MelonLoaderPath)\Managed</ManagedPath>
+		<ModsPath>$(TheLongDarkPath)\Mods</ModsPath>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Reference Include="0Harmony">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\0Harmony.dll</HintPath>
+			<HintPath>$(MelonLoaderPath)\0Harmony.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="Assembly-CSharp">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\Managed\Assembly-CSharp.dll</HintPath>
+			<HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath>
 			<Private>False</Private>
 			<Aliases>Hinterland</Aliases>
 		</Reference>
 		<Reference Include="Il2Cppmscorlib">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
+			<HintPath>$(ManagedPath)\Il2Cppmscorlib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="Il2CppSystem">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\Managed\Il2CppSystem.dll</HintPath>
+			<HintPath>$(ManagedPath)\Il2CppSystem.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="MelonLoader">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\MelonLoader.dll</HintPath>
+			<HintPath>$(MelonLoaderPath)\MelonLoader.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="ModSettings">
-			<HintPath>$(TheLongDarkPath)\Mods\ModSettings.dll</HintPath>
+			<HintPath>$(ModsPath)\ModSettings.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="UnhollowerBaseLib">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
+			<HintPath>$(ManagedPath)\UnhollowerBaseLib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
-			<HintPath>$(TheLongDarkPath)\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
+			<HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="IsExternalInit" Version="1.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Nullable" Version="1.3.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
