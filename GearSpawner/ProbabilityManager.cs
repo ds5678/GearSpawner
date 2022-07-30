@@ -1,7 +1,5 @@
 ﻿extern alias Hinterland;
 using Hinterland;
-using System;
-using UnityEngine;
 
 namespace GearSpawner;
 
@@ -14,46 +12,7 @@ internal static class ProbabilityManager
 			return 100f; //overrides everything else
 		}
 
-		DifficultyLevel difficultyLevel = GetDifficultyLevel();
-		FirearmAvailability firearmAvailability = GetFirearmAvailability();
-
-		if (SpawnTagManager.ContainsTag(gearSpawnInfo.Tag))
-		{
-			return SpawnTagManager.GetTaggedFunction(gearSpawnInfo.Tag).Invoke(difficultyLevel, firearmAvailability, gearSpawnInfo);
-		}
-		else
-		{
-			return GetAdjustedProbability(difficultyLevel, gearSpawnInfo.SpawnChance);
-		}
-	}
-
-	private static float GetAdjustedProbability(DifficultyLevel difficultyLevel, float baseProbability)
-	{
-		var multiplier = difficultyLevel switch
-		{
-			DifficultyLevel.Pilgram => Math.Max(0f, Settings.Instance.pilgramSpawnProbabilityMultiplier),
-			DifficultyLevel.Voyager => Math.Max(0f, Settings.Instance.voyagerSpawnProbabilityMultiplier),
-			DifficultyLevel.Stalker => Math.Max(0f, Settings.Instance.stalkerSpawnProbabilityMultiplier),
-			DifficultyLevel.Interloper => Math.Max(0f, Settings.Instance.interloperSpawnProbabilityMultiplier),
-			DifficultyLevel.Storymode => Math.Max(0f, Settings.Instance.storySpawnProbabilityMultiplier),
-			DifficultyLevel.Challenge => Math.Max(0f, Settings.Instance.challengeSpawnProbabilityMultiplier),
-			_ => 1f,
-		};
-		if (multiplier == 0f)
-		{
-			return 0f; //can disable spawns for a game mode
-		}
-
-		float clampedProbability = Mathf.Clamp(baseProbability, 0f, 100f);//just to be safe
-
-		if (clampedProbability == 100f)
-		{
-			return 100f; //for guaranteed spawns
-		}
-		else
-		{
-			return Mathf.Clamp(multiplier * clampedProbability, 0f, 100f); //for normal spawns
-		}
+		return SpawnTagManager.GetHandler(gearSpawnInfo.Tag).GetProbability(GetDifficultyLevel(), GetFirearmAvailability(), gearSpawnInfo);
 	}
 
 	public static DifficultyLevel GetDifficultyLevel()
@@ -62,8 +21,8 @@ internal static class ProbabilityManager
 		{
 			return DifficultyLevel.Storymode;
 		}
-		ExperienceModeType experienceModeType = ExperienceModeManager.GetCurrentExperienceModeType();
-		return experienceModeType switch
+		
+		return ExperienceModeManager.GetCurrentExperienceModeType() switch
 		{
 			ExperienceModeType.Pilgrim => DifficultyLevel.Pilgram,
 			ExperienceModeType.Voyageur => DifficultyLevel.Voyager,
@@ -98,17 +57,12 @@ internal static class ProbabilityManager
 	{
 		if (GameManager.IsStoryMode())
 		{
-			if (SaveGameSystem.m_CurrentEpisode == Episode.One || SaveGameSystem.m_CurrentEpisode == Episode.Two)
-			{
-				return FirearmAvailability.Rifle;
-			}
-			else
-			{
-				return FirearmAvailability.All;
-			}
+			return SaveGameSystem.m_CurrentEpisode == Episode.One || SaveGameSystem.m_CurrentEpisode == Episode.Two
+				? FirearmAvailability.Rifle
+				: FirearmAvailability.All;
 		}
-		ExperienceModeType experienceModeType = ExperienceModeManager.GetCurrentExperienceModeType();
-		return experienceModeType switch
+		
+		return ExperienceModeManager.GetCurrentExperienceModeType() switch
 		{
 			ExperienceModeType.Interloper => FirearmAvailability.None,
 			ExperienceModeType.Custom => GetCustomFirearmAvailability(),
@@ -118,23 +72,15 @@ internal static class ProbabilityManager
 
 	private static FirearmAvailability GetCustomFirearmAvailability()
 	{
-		bool revolvers = GameManager.GetCustomMode().m_RevolversInWorld;
-		bool rifles = GameManager.GetCustomMode().m_RiflesInWorld;
-		if (revolvers && rifles)
+		FirearmAvailability result = FirearmAvailability.None;
+		if (GameManager.GetCustomMode().m_RevolversInWorld)
 		{
-			return FirearmAvailability.All;
+			result |= FirearmAvailability.Revolver;
 		}
-		else if (revolvers)
+		if (GameManager.GetCustomMode().m_RiflesInWorld)
 		{
-			return FirearmAvailability.Revolver;
+			result |= FirearmAvailability.Rifle;
 		}
-		else if (rifles)
-		{
-			return FirearmAvailability.Rifle;
-		}
-		else
-		{
-			return FirearmAvailability.None;
-		}
+		return result;
 	}
 }
