@@ -1,6 +1,5 @@
 ﻿using Il2Cpp;
 using MelonLoader;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace GearSpawner;

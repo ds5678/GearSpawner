@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GearSpawner;
+﻿namespace GearSpawner;
 
 public sealed class InvalidFormatException : Exception
 {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace GearSpawner;
+﻿namespace GearSpawner;
 
 internal sealed class FunctionGearSpawnHandler : IGearSpawnHandler
 {

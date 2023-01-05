@@ -13,7 +13,7 @@ internal static class Patches
 			LootTableManager.ConfigureLootTable(__instance);
 		}
 	}
-	
+
 	[HarmonyPatch(typeof(LootTable), nameof(LootTable.GetRandomGearPrefab))]
 	internal static class LootTable_GetRandomGearPrefab
 	{

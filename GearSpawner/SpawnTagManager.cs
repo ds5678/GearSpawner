@@ -1,6 +1,4 @@
 ﻿using MelonLoader;
-using System;
-using System.Collections.Generic;
 
 namespace GearSpawner;
 
@@ -34,8 +32,8 @@ public static class SpawnTagManager
 
 	internal static IGearSpawnHandler GetHandler(string tag)
 	{
-		return taggedHandlers.TryGetValue(tag, out IGearSpawnHandler? handler) 
-			? handler 
+		return taggedHandlers.TryGetValue(tag, out IGearSpawnHandler? handler)
+			? handler
 			: defaultHandler;
 	}
 }

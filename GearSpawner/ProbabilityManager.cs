@@ -21,7 +21,7 @@ internal static class ProbabilityManager
 		{
 			return DifficultyLevel.Storymode;
 		}
-		
+
 		return ExperienceModeManager.GetCurrentExperienceModeType() switch
 		{
 			ExperienceModeType.Pilgrim => DifficultyLevel.Pilgram,
@@ -61,7 +61,7 @@ internal static class ProbabilityManager
 				? FirearmAvailability.Rifle
 				: FirearmAvailability.All;
 		}
-		
+
 		return ExperienceModeManager.GetCurrentExperienceModeType() switch
 		{
 			ExperienceModeType.Interloper => FirearmAvailability.None,
