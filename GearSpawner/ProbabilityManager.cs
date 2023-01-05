@@ -1,5 +1,5 @@
-﻿extern alias Hinterland;
-using Hinterland;
+﻿using Il2Cpp;
+using Il2CppTLD.Gameplay.Tunable;
 
 namespace GearSpawner;
 
@@ -45,10 +45,10 @@ internal static class ProbabilityManager
 	{
 		return GameManager.GetCustomMode().m_BaseWorldDifficulty switch
 		{
-			CustomExperienceModeManager.CustomTunableLMHV.VeryHigh => DifficultyLevel.Pilgram,
-			CustomExperienceModeManager.CustomTunableLMHV.High => DifficultyLevel.Voyager,
-			CustomExperienceModeManager.CustomTunableLMHV.Medium => DifficultyLevel.Stalker,
-			CustomExperienceModeManager.CustomTunableLMHV.Low => DifficultyLevel.Interloper,
+			CustomTunableLMHV.VeryHigh => DifficultyLevel.Pilgram,
+			CustomTunableLMHV.High => DifficultyLevel.Voyager,
+			CustomTunableLMHV.Medium => DifficultyLevel.Stalker,
+			CustomTunableLMHV.Low => DifficultyLevel.Interloper,
 			_ => DifficultyLevel.Other,
 		};
 	}

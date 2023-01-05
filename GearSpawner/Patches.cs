@@ -1,6 +1,5 @@
-﻿extern alias Hinterland;
-using Hinterland;
-using HarmonyLib;
+﻿using HarmonyLib;
+using Il2Cpp;
 
 namespace GearSpawner;
 

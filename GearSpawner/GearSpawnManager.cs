@@ -1,5 +1,4 @@
-﻿extern alias Hinterland;
-using Hinterland;
+﻿using Il2Cpp;
 using MelonLoader;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,7 +92,7 @@ internal static class GearSpawnManager
 		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
 			string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
-			Object prefab = Resources.Load(normalizedGearName);
+			UnityEngine.Object prefab = Resources.Load(normalizedGearName);
 
 			if (prefab == null)
 			{
@@ -104,12 +103,12 @@ internal static class GearSpawnManager
 			float spawnProbability = ProbabilityManager.GetAdjustedProbability(eachGearSpawnInfo);
 			if (RandomUtils.RollChance(spawnProbability))
 			{
-				GameObject gear = Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
+				GameObject gear = UnityEngine.Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
 				gear.name = prefab.name;
 				DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
 				if (xpmode != null)
 				{
-					Object.Destroy(xpmode);
+					UnityEngine.Object.Destroy(xpmode);
 				}
 
 				spawnedItems.Add(gear.GetComponent<GearItem>());
