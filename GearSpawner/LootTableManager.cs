@@ -1,12 +1,15 @@
 ﻿using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GearSpawner;
 
 internal static class LootTableManager
 {
 	private static Dictionary<string, List<LootTableEntry>> lootTableEntries = new Dictionary<string, List<LootTableEntry>>();
+	private static Dictionary<string, string> gearItemAssets = new();
 
 	internal static void AddLootTableEntry(string lootTable, LootTableEntry entry)
 	{
@@ -82,4 +85,66 @@ internal static class LootTableManager
 		}
 		return "loottable" + lootTable.ToLowerInvariant();
 	}
+
+
+	internal static void ConfigureLootTableData(LootTableData lootTableData)
+	{
+
+		if (lootTableData == null)
+		{
+			return;
+		}
+
+		List<LootTableEntry> entries;
+		if (lootTableEntries.TryGetValue(lootTableData.name.ToLowerInvariant(), out entries))
+		{
+
+			MelonLoader.MelonLogger.Warning("FOUND " + lootTableData.name.ToLowerInvariant());
+			MelonLoader.MelonLogger.Warning("to ADD " + entries.Count);
+
+			lootTableData.m_BaseLoot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
+			lootTableData.m_Loot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
+
+			foreach (LootTableEntry entry in entries)
+			{
+				LootTableItemReference itemRef = new();
+//				string guid = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(entry.PrefabName.ToLower()))).Replace("-", "");
+				itemRef.m_GearItem = new ModAssetReferenceGearItem(entry.PrefabName);
+				itemRef.m_Weight = entry.Weight;
+
+				//if (!gearItemAssets.ContainsKey(guid.ToLower()))
+				//{
+				//	gearItemAssets.Add(guid.ToLower(), entry.PrefabName.ToLower());
+				//}
+
+
+				if (!lootTableData.m_BaseLoot.Contains(itemRef))
+				{
+					MelonLoader.MelonLogger.Warning("m_BaseLoot ADDED " + entry.PrefabName);
+					lootTableData.m_BaseLoot.Add(itemRef);
+				}
+				if (!lootTableData.m_Loot.Contains(itemRef))
+				{
+					MelonLoader.MelonLogger.Warning("m_Loot ADDED " + entry.PrefabName);
+					lootTableData.m_Loot.Add(itemRef);
+				}
+
+				lootTableData.m_SumOfWeights += itemRef.m_Weight;
+
+			}
+
+
+		}
+
+	}
+
+	public static string GetGearNameFromAssetRef(string assetRef)
+	{
+		if (gearItemAssets.ContainsKey(assetRef))
+		{
+			return gearItemAssets[assetRef];
+		}
+		return null;
+	}
+
 }

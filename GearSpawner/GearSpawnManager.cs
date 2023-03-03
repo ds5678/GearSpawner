@@ -1,4 +1,5 @@
-﻿using Il2Cpp;
+﻿using Harmony;
+using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
 
@@ -68,7 +69,7 @@ internal static class GearSpawnManager
 		SpawnManager.InvokeEvent(spawnedItems);
 	}
 
-	private static bool IsNonGameScene()
+	internal static bool IsNonGameScene()
 	{
 		return string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene == "MainMenu" || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty";
 	}
@@ -90,7 +91,7 @@ internal static class GearSpawnManager
 		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
 			string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
-			UnityEngine.Object prefab = Resources.Load(normalizedGearName);
+			GearItem prefab = GearItem.LoadGearItemPrefab(normalizedGearName);
 
 			if (prefab == null)
 			{
@@ -101,7 +102,10 @@ internal static class GearSpawnManager
 			float spawnProbability = ProbabilityManager.GetAdjustedProbability(eachGearSpawnInfo);
 			if (RandomUtils.RollChance(spawnProbability))
 			{
-				GameObject gear = UnityEngine.Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
+
+				//prefab.transform.position = eachGearSpawnInfo.Position;
+				//prefab.transform.rotation = eachGearSpawnInfo.Rotation;
+				GameObject gear = UnityEngine.Object.Instantiate(prefab.gameObject, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
 				gear.name = prefab.name;
 				DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
 				if (xpmode != null)
