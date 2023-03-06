@@ -3,13 +3,13 @@ using MelonLoader;
 using UnityEngine;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEngine.AddressableAssets;
 
 namespace GearSpawner;
 
 internal static class LootTableManager
 {
 	private static Dictionary<string, List<LootTableEntry>> lootTableEntries = new Dictionary<string, List<LootTableEntry>>();
-	private static Dictionary<string, string> gearItemAssets = new();
 
 	internal static void AddLootTableEntry(string lootTable, LootTableEntry entry)
 	{
@@ -34,7 +34,7 @@ internal static class LootTableManager
 				continue;
 			}
 
-			GameObject prefab = Resources.Load(eachEntry.PrefabName).Cast<GameObject>();
+			GameObject prefab = Addressables.LoadAssetAsync<GameObject>(eachEntry.PrefabName).WaitForCompletion().Cast<GameObject>();
 			if (prefab == null)
 			{
 				MelonLogger.Warning("Could not find prefab '{0}'.", eachEntry.PrefabName);
@@ -87,29 +87,29 @@ internal static class LootTableManager
 	}
 
 
-	internal static void ConfigureLootTableData(LootTableData lootTableData)
+	internal static bool ConfigureLootTableData(LootTableData lootTableData)
 	{
-
+		bool tableChanged = false;
 		if (lootTableData == null)
 		{
-			return;
+			return false;
 		}
 
 		List<LootTableEntry> entries;
 		if (lootTableEntries.TryGetValue(lootTableData.name.ToLowerInvariant(), out entries))
 		{
 
-			MelonLoader.MelonLogger.Warning("FOUND " + lootTableData.name.ToLowerInvariant());
-			MelonLoader.MelonLogger.Warning("to ADD " + entries.Count);
+			//MelonLoader.MelonLogger.Warning("FOUND " + lootTableData.name.ToLowerInvariant());
+			//MelonLoader.MelonLogger.Warning("to ADD " + entries.Count);
 
-			lootTableData.m_BaseLoot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
-			lootTableData.m_Loot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
+			//lootTableData.m_BaseLoot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
+			//lootTableData.m_Loot = new Il2CppSystem.Collections.Generic.List<LootTableItemReference>();
 
 			foreach (LootTableEntry entry in entries)
 			{
 				LootTableItemReference itemRef = new();
 //				string guid = BitConverter.ToString(MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(entry.PrefabName.ToLower()))).Replace("-", "");
-				itemRef.m_GearItem = new ModAssetReferenceGearItem(entry.PrefabName);
+				itemRef.m_GearItem = new AssetReferenceGearItem(entry.PrefabName);
 				itemRef.m_Weight = entry.Weight;
 
 				//if (!gearItemAssets.ContainsKey(guid.ToLower()))
@@ -120,12 +120,14 @@ internal static class LootTableManager
 
 				if (!lootTableData.m_BaseLoot.Contains(itemRef))
 				{
-					MelonLoader.MelonLogger.Warning("m_BaseLoot ADDED " + entry.PrefabName);
+					tableChanged = true;
+					//MelonLoader.MelonLogger.Warning("m_BaseLoot ADDED " + entry.PrefabName);
 					lootTableData.m_BaseLoot.Add(itemRef);
 				}
 				if (!lootTableData.m_Loot.Contains(itemRef))
 				{
-					MelonLoader.MelonLogger.Warning("m_Loot ADDED " + entry.PrefabName);
+					tableChanged = true;
+					//MelonLoader.MelonLogger.Warning("m_Loot ADDED " + entry.PrefabName);
 					lootTableData.m_Loot.Add(itemRef);
 				}
 
@@ -135,16 +137,7 @@ internal static class LootTableManager
 
 
 		}
-
-	}
-
-	public static string GetGearNameFromAssetRef(string assetRef)
-	{
-		if (gearItemAssets.ContainsKey(assetRef))
-		{
-			return gearItemAssets[assetRef];
-		}
-		return null;
+		return tableChanged;
 	}
 
 }

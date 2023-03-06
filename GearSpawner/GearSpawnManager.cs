@@ -2,6 +2,7 @@
 using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace GearSpawner;
 
@@ -91,7 +92,8 @@ internal static class GearSpawnManager
 		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
 			string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
-			GearItem prefab = GearItem.LoadGearItemPrefab(normalizedGearName);
+			//			GearItem prefab = GearItem.LoadGearItemPrefab(normalizedGearName);
+			GameObject? prefab = Addressables.LoadAssetAsync<GameObject>(normalizedGearName).WaitForCompletion();
 
 			if (prefab == null)
 			{
@@ -105,7 +107,7 @@ internal static class GearSpawnManager
 
 				//prefab.transform.position = eachGearSpawnInfo.Position;
 				//prefab.transform.rotation = eachGearSpawnInfo.Rotation;
-				GameObject gear = UnityEngine.Object.Instantiate(prefab.gameObject, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
+				GameObject gear = UnityEngine.Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
 				gear.name = prefab.name;
 				DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
 				if (xpmode != null)

@@ -32,7 +32,8 @@ internal static class GearSpawnReader
 		}
 		else
 		{
-			return line.Trim().ToLowerInvariant();
+			return line.Trim();
+//			return line.Trim().ToLowerInvariant();
 		}
 	}
 
