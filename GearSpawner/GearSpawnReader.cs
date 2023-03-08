@@ -32,6 +32,7 @@ internal static class GearSpawnReader
 		}
 		else
 		{
+			// had to remove "ToLowerInvariant" as Asset refernces are case sensitive
 			return line.Trim();
 //			return line.Trim().ToLowerInvariant();
 		}
