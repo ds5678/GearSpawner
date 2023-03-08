@@ -23,12 +23,14 @@ internal static class GearSpawnManager
 
 	private static string? GetNormalizedGearName(string gearName)
 	{
-		if (gearName != null && !gearName.ToLowerInvariant().StartsWith("gear_"))
+		gearName = gearName.Replace("gear_","GEAR_");
+		if (gearName != null && !gearName.ToLowerInvariant().StartsWith("GEAR_"))
 		{
-			return "gear_" + gearName;
+			return "GEAR_" + gearName;
 		}
 		else
 		{
+
 			return gearName;
 		}
 	}
