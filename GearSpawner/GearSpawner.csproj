@@ -1,10 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-<PropertyGroup>
-        <!--This needs to be changed for the mod to compile.-->
-        <TheLongDarkPath>C:\Program Files (x86)\Steam\steamapps\common\TheLongDark</TheLongDarkPath>
-    </PropertyGroup>
-	
 	<PropertyGroup>
 		<!--This is the .NET version the mod will be compiled with. Don't change it.-->
 		<TargetFramework>net6.0</TargetFramework>
@@ -27,16 +22,30 @@
 		<!--none skips creation of pdb data.-->
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<Authors>ds5678</Authors>
+		<Version>2.0.0</Version>
+		<AssemblyVersion>2.0.0</AssemblyVersion>
+		<PackageId>ds5678.Modding.TLD.GearSpawner</PackageId>
+		<PackageTags>MelonLoader Modding TLD Json Gear Spawning Utility Mod</PackageTags>
+		<RepositoryUrl>https://github.com/ds5678/GearSpawner</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<PackageProjectUrl>https://github.com/ds5678/GearSpawner</PackageProjectUrl>
+		<Description>Library for The Long Dark that allows spawning modded items in the world.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>bin\GearSpawner.xml</DocumentationFile>
+		<NoWarn>1591</NoWarn>
+	</PropertyGroup>
 
 	<!--This is the of packages that the mod references.-->
 	<ItemGroup>
 		<!--This package contains almost everything a person could possibly need to reference while modding.-->
 		<PackageReference Include="ds5678.Modding.TLD.Il2CppAssemblies.Windows" Version="2.6.0" />
-
 		<PackageReference Include="ds5678.Modding.TLD.ModSettings" Version="1.9.0" />
 	</ItemGroup>
 	
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="xcopy /y /d  &quot;$(TargetPath)&quot; &quot;$(TheLongDarkPath)\Mods&quot;" />
-	</Target>
 </Project>
