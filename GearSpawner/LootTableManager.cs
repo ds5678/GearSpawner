@@ -18,20 +18,6 @@ internal static class LootTableManager
 		lootTableEntries[normalizedLootTableName].Add(entry.Normalize());
 	}
 
-	private static string GetNormalizedLootTableName(string lootTable)
-	{
-		if (lootTable.StartsWith("Loot", System.StringComparison.InvariantCultureIgnoreCase))
-		{
-			return lootTable.ToLowerInvariant();
-		}
-		if (lootTable.StartsWith("Cargo", System.StringComparison.InvariantCultureIgnoreCase))
-		{
-			return "loot" + lootTable.ToLowerInvariant();
-		}
-		return "loottable" + lootTable.ToLowerInvariant();
-	}
-
-
 	internal static bool ConfigureLootTableData(LootTableData lootTableData)
 	{
 		bool tableChanged = false;
@@ -64,6 +50,19 @@ internal static class LootTableManager
 			}
 		}
 		return tableChanged;
+	}
+
+	private static string GetNormalizedLootTableName(string lootTable)
+	{
+		if (lootTable.StartsWith("Loot", System.StringComparison.InvariantCultureIgnoreCase))
+		{
+			return lootTable.ToLowerInvariant();
+		}
+		if (lootTable.StartsWith("Cargo", System.StringComparison.InvariantCultureIgnoreCase))
+		{
+			return "loot" + lootTable.ToLowerInvariant();
+		}
+		return "loottable" + lootTable.ToLowerInvariant();
 	}
 
 }
