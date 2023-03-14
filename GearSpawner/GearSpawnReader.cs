@@ -86,8 +86,8 @@ internal static class GearSpawnReader
 
 		foreach (string eachLine in lines)
 		{
-			var trimmedLine = eachLine.Trim();
-			if (trimmedLine == null || trimmedLine.Length == 0 || trimmedLine.StartsWith("#"))
+			string trimmedLine = eachLine.Trim();
+			if (trimmedLine.Length == 0 || trimmedLine.StartsWith("#"))
 			{
 				continue;
 			}
