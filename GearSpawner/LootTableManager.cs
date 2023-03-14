@@ -1,9 +1,9 @@
-﻿using Il2Cpp;
-using MelonLoader;
-using UnityEngine;
+﻿using HarmonyLib;
+using Il2Cpp;
 
 namespace GearSpawner;
 
+[HarmonyPatch]
 internal static class LootTableManager
 {
 	private static Dictionary<string, List<LootTableEntry>> lootTableEntries = new Dictionary<string, List<LootTableEntry>>();
@@ -20,54 +20,38 @@ internal static class LootTableManager
 		lootTableEntries[normalizedLootTableName].Add(entry.Normalize());
 	}
 
-	private static void AddEntries(LootTable lootTable, List<LootTableEntry> entries)
+	internal static bool ConfigureLootTableData(LootTableData lootTableData)
 	{
-		foreach (LootTableEntry eachEntry in entries)
+		bool tableChanged = false;
+		if (lootTableData == null)
 		{
-			int index = GetIndex(lootTable, eachEntry.PrefabName);
-			if (index != -1)
-			{
-				lootTable.m_Weights[index] = eachEntry.Weight;
-				continue;
-			}
-
-			GameObject prefab = Resources.Load(eachEntry.PrefabName).Cast<GameObject>();
-			if (prefab == null)
-			{
-				MelonLogger.Warning("Could not find prefab '{0}'.", eachEntry.PrefabName);
-				continue;
-			}
-
-			lootTable.m_Prefabs.Add(prefab);
-			lootTable.m_Weights.Add(eachEntry.Weight);
-		}
-	}
-
-	internal static void ConfigureLootTable(LootTable lootTable)
-	{
-		if (lootTable == null)
-		{
-			return;
+			return false;
 		}
 
 		List<LootTableEntry> entries;
-		if (lootTableEntries.TryGetValue(lootTable.name.ToLowerInvariant(), out entries))
+		if (lootTableEntries.TryGetValue(lootTableData.name.ToLowerInvariant(), out entries))
 		{
-			AddEntries(lootTable, entries);
-		}
-	}
 
-	private static int GetIndex(LootTable lootTable, string prefabName)
-	{
-		for (int i = 0; i < lootTable.m_Prefabs.Count; i++)
-		{
-			if (lootTable.m_Prefabs[i] != null && lootTable.m_Prefabs[i].name.Equals(prefabName, System.StringComparison.InvariantCultureIgnoreCase))
+			foreach (LootTableEntry entry in entries)
 			{
-				return i;
+				LootTableItemReference itemRef = new();
+				itemRef.m_GearItem = new AssetReferenceGearItem(entry.PrefabName);
+				itemRef.m_Weight = entry.Weight;
+
+				if (!lootTableData.m_BaseLoot.Contains(itemRef))
+				{
+					tableChanged = true;
+					lootTableData.m_BaseLoot.Add(itemRef);
+				}
+				if (!lootTableData.m_Loot.Contains(itemRef))
+				{
+					tableChanged = true;
+					lootTableData.m_Loot.Add(itemRef);
+				}
+				lootTableData.m_SumOfWeights += itemRef.m_Weight;
 			}
 		}
-
-		return -1;
+		return tableChanged;
 	}
 
 	private static string GetNormalizedLootTableName(string lootTable)
@@ -81,5 +65,13 @@ internal static class LootTableManager
 			return "loot" + lootTable.ToLowerInvariant();
 		}
 		return "loottable" + lootTable.ToLowerInvariant();
+	}
+
+	// patch the look tables as they initialize
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(LootTableData), nameof(LootTableData.Initialize))]
+	private static void LootTableData_Initialize(LootTableData __instance)
+	{
+			ConfigureLootTableData(__instance);
 	}
 }

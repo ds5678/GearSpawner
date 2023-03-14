@@ -12,29 +12,17 @@ internal static class GearSpawnReader
 
 	private static readonly Regex LOOTTABLE_ENTRY_REGEX = new Regex(
 		@"^item\s*=\s*(\w+)" +
-		@"\W+w\s*=\s*(" + NUMBER + ")$");
+		@"\W+w\s*=\s*(" + NUMBER + ")$", RegexOptions.Compiled);
 
-	private static readonly Regex LOOTTABLE_REGEX = new Regex(@"^loottable\s*=\s*(\w+)$");
-	private static readonly Regex SCENE_REGEX = new Regex(@"^scene\s*=\s*(\w+)$");
-	private static readonly Regex TAG_REGEX = new Regex(@"^tag\s*=\s*(\w+)$");
+	private static readonly Regex LOOTTABLE_REGEX = new Regex(@"^loottable\s*=\s*(\w+)$", RegexOptions.Compiled);
+	private static readonly Regex SCENE_REGEX = new Regex(@"^scene\s*=\s*(\w+)$", RegexOptions.Compiled);
+	private static readonly Regex TAG_REGEX = new Regex(@"^tag\s*=\s*(\w+)$", RegexOptions.Compiled);
 
 	private static readonly Regex SPAWN_REGEX = new Regex(
 		@"^item\s*=\s*(\w+)" +
 		@"(?:\W+p\s*=\s*(" + VECTOR + "))?" +
 		@"(?:\W+r\s*=\s*(" + VECTOR + "))?" +
-		@"(?:\W+\s*c\s*=\s*(" + NUMBER + "))?$");
-
-	private static string GetTrimmedLine(string line)
-	{
-		if (line == null)
-		{
-			return "";
-		}
-		else
-		{
-			return line.Trim().ToLowerInvariant();
-		}
-	}
+		@"(?:\W+\s*c\s*=\s*(" + NUMBER + "))?$", RegexOptions.Compiled);
 
 	private static float ParseFloat(string value, float defaultValue, string line)
 	{
@@ -98,7 +86,7 @@ internal static class GearSpawnReader
 
 		foreach (string eachLine in lines)
 		{
-			var trimmedLine = GetTrimmedLine(eachLine);
+			string trimmedLine = eachLine.Trim();
 			if (trimmedLine.Length == 0 || trimmedLine.StartsWith("#"))
 			{
 				continue;
