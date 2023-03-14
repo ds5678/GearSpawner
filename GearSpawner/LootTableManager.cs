@@ -1,7 +1,9 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+using Il2Cpp;
 
 namespace GearSpawner;
 
+[HarmonyPatch]
 internal static class LootTableManager
 {
 	private static Dictionary<string, List<LootTableEntry>> lootTableEntries = new Dictionary<string, List<LootTableEntry>>();
@@ -65,4 +67,11 @@ internal static class LootTableManager
 		return "loottable" + lootTable.ToLowerInvariant();
 	}
 
+	// patch the look tables as they initialize
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(LootTableData), nameof(LootTableData.Initialize))]
+	private static void LootTableData_Initialize(LootTableData __instance)
+	{
+			ConfigureLootTableData(__instance);
+	}
 }

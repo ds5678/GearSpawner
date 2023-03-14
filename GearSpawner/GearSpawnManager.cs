@@ -1,10 +1,12 @@
-﻿using Il2Cpp;
+﻿using HarmonyLib;
+using Il2Cpp;
 using MelonLoader;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
 namespace GearSpawner;
 
+[HarmonyPatch]
 internal static class GearSpawnManager
 {
 	private static Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new Dictionary<string, List<GearSpawnInfo>>();
@@ -21,16 +23,14 @@ internal static class GearSpawnManager
 		sceneGearSpawnInfos.Add(gearSpawnInfo);
 	}
 
-	private static string? GetNormalizedGearName(string gearName)
+	private static string GetNormalizedGearName(string gearName)
 	{
-		gearName = gearName.Replace("gear_","GEAR_");
-		if (gearName != null && !gearName.ToLowerInvariant().StartsWith("GEAR_"))
+		if (!gearName.StartsWith("GEAR_"))
 		{
 			return "GEAR_" + gearName;
 		}
 		else
 		{
-
 			return gearName;
 		}
 	}
@@ -92,7 +92,7 @@ internal static class GearSpawnManager
 
 		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
-			string? normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
+			string normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
 			GameObject? prefab = Addressables.LoadAssetAsync<GameObject>(normalizedGearName).WaitForCompletion();
 
 			if (prefab == null)
@@ -116,5 +116,16 @@ internal static class GearSpawnManager
 			}
 		}
 		return spawnedItems.ToArray();
+	}
+
+	// patch the scenes for loose items as they load
+	/// <summary>
+	/// Other than GameManager.SetAudioModeForLoadedScene(), QualitySettingsManager.ApplyCurrentQualitySettings is the last method called within GameManager.Update() before save file saving and loading occur. They only get called after the loading panel has closed, and they each only get called once. If GameManager.SetAudioModeForLoadedScene() was not inlined, it would be used instead.
+	/// </summary>
+	[HarmonyPrefix]
+	[HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
+	internal static void GameManager_ApplyCurrentQualitySettings()
+	{
+		PrepareScene();
 	}
 }

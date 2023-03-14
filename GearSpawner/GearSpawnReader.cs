@@ -24,19 +24,8 @@ internal static class GearSpawnReader
 		@"(?:\W+r\s*=\s*(" + VECTOR + "))?" +
 		@"(?:\W+\s*c\s*=\s*(" + NUMBER + "))?$");
 
-	private static string GetTrimmedLine(string line)
-	{
-		if (line == null)
-		{
-			return "";
-		}
-		else
-		{
-			// had to remove "ToLowerInvariant" as Asset refernces are case sensitive
-			return line.Trim();
-//			return line.Trim().ToLowerInvariant();
-		}
-	}
+
+	private static string GetTrimmedLine(string line) => line?.Trim() ?? "";
 
 	private static float ParseFloat(string value, float defaultValue, string line)
 	{

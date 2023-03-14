@@ -7,30 +7,10 @@ namespace GearSpawner;
 
 internal static class Patches
 {
-	// patch the look tables as they initialize
-	[HarmonyPatch(typeof(LootTableData), nameof(LootTableData.Initialize))]
-	internal static class LootTableData_Awake
-	{
-		private static void Postfix(LootTableData __instance)
-		{
-			LootTableManager.ConfigureLootTableData(__instance);
-		}
-	}
-
-	//patch the scenes for loose items as they load
 	/// <summary>
-	/// Other than GameManager.SetAudioModeForLoadedScene(), QualitySettingsManager.ApplyCurrentQualitySettings is the last method called within GameManager.Update() before save file saving and loading occur. They only get called after the loading panel has closed, and they each only get called once. If GameManager.SetAudioModeForLoadedScene() was not inlined, it would be used instead.
+	/// This method is called when a loot table item is validated, requires this patch due to GearSpawner using asset refs (e.g. GEAR_AssetName) that aren't guids like HL uses
+	/// Makes sense for it to be part of GearSpawner as this is the mod that modifies the loot tables.
 	/// </summary>
-	[HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
-	internal static class GameManager_ApplyCurrentQualitySettings
-	{
-		private static void Prefix()
-		{
-			GearSpawnManager.PrepareScene();
-		}
-	}
-
-	// this patch is required to allow non md5 asset reference names to be "valid"
 	[HarmonyPatch(typeof(AssetReference), nameof(AssetReference.RuntimeKeyIsValid))]
 	internal static class RuntimeKeyIsValid
 	{

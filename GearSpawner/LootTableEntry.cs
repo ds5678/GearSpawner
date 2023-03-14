@@ -15,7 +15,7 @@ public readonly record struct LootTableEntry(string PrefabName, int Weight)
 
 	private static string NormalizePrefabName(string prefabName)
 	{
-		return prefabName.StartsWith("GEAR_", System.StringComparison.InvariantCultureIgnoreCase)
+		return prefabName.StartsWith("GEAR_", StringComparison.InvariantCulture)
 			? prefabName
 			: "GEAR_" + prefabName;
 	}
