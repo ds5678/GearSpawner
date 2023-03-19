@@ -5,7 +5,7 @@ namespace GearSpawner;
 
 public static class SpawnManager
 {
-	public static event System.Action<GearItem[]>? OnSpawnGearItems;
+	public static event Action<GearItem[]>? OnSpawnGearItems;
 
 	public static void ParseSpawnInformation(string text)
 	{

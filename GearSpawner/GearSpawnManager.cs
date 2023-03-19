@@ -9,45 +9,38 @@ namespace GearSpawner;
 [HarmonyPatch]
 internal static class GearSpawnManager
 {
-	private static Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new Dictionary<string, List<GearSpawnInfo>>();
+	private static readonly Dictionary<string, List<GearSpawnInfo>> gearSpawnInfos = new();
 
 	internal static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo)
 	{
 		string normalizedSceneName = GetNormalizedSceneName(sceneName);
-		if (!gearSpawnInfos.ContainsKey(normalizedSceneName))
+		if (!gearSpawnInfos.TryGetValue(normalizedSceneName, out List<GearSpawnInfo>? sceneGearSpawnInfos))
 		{
-			gearSpawnInfos.Add(normalizedSceneName, new List<GearSpawnInfo>());
+			sceneGearSpawnInfos = new();
+			gearSpawnInfos.Add(normalizedSceneName, sceneGearSpawnInfos);
 		}
 
-		List<GearSpawnInfo> sceneGearSpawnInfos = gearSpawnInfos[normalizedSceneName];
 		sceneGearSpawnInfos.Add(gearSpawnInfo);
 	}
 
 	private static string GetNormalizedGearName(string gearName)
 	{
-		if (!gearName.StartsWith("GEAR_"))
-		{
-			return "GEAR_" + gearName;
-		}
-		else
-		{
-			return gearName;
-		}
+		return gearName.StartsWith("GEAR_") ? gearName : "GEAR_" + gearName;
 	}
 
 	private static string GetNormalizedSceneName(string sceneName) => sceneName.ToLowerInvariant();
 
-	private static IEnumerable<GearSpawnInfo> GetSpawnInfos(string sceneName)
+	private static IEnumerable<GearSpawnInfo>? GetSpawnInfos(string sceneName)
 	{
-		if (gearSpawnInfos.TryGetValue(sceneName, out List<GearSpawnInfo> result))
+		if (gearSpawnInfos.TryGetValue(sceneName, out List<GearSpawnInfo>? result))
 		{
-			MelonLogger.Msg($"Found {result.Count} spawn entries for '{sceneName}'");
+			GearSpawnerMod.Logger.Msg($"Found {result.Count} spawn entries for '{sceneName}'");
 			return result;
 		}
 		else
 		{
-			MelonLogger.Msg($"Could not find any spawn entries for '{sceneName}'");
-			return Enumerable.Empty<GearSpawnInfo>();
+			GearSpawnerMod.Logger.Msg($"Could not find any spawn entries for '{sceneName}'");
+			return null;
 		}
 	}
 
@@ -59,21 +52,21 @@ internal static class GearSpawnManager
 		}
 
 		string sceneName = GameManager.m_ActiveScene;
-		MelonLogger.Msg($"Spawning items for scene '{sceneName}' ...");
+		GearSpawnerMod.Logger.Msg($"Spawning items for scene '{sceneName}' ...");
 		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 		stopwatch.Start();
 
 		GearItem[] spawnedItems = SpawnGearForScene(GetNormalizedSceneName(sceneName));
 
 		stopwatch.Stop();
-		MelonLogger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
+		GearSpawnerMod.Logger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
 
 		SpawnManager.InvokeEvent(spawnedItems);
 	}
 
 	internal static bool IsNonGameScene()
 	{
-		return string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene == "MainMenu" || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty";
+		return GameManager.m_ActiveScene is null or "" or "MainMenu" or "Boot" or "Empty";
 	}
 
 	/// <summary>
@@ -82,13 +75,13 @@ internal static class GearSpawnManager
 	/// <param name="sceneName"></param>
 	private static GearItem[] SpawnGearForScene(string sceneName)
 	{
-		IEnumerable<GearSpawnInfo> sceneGearSpawnInfos = GetSpawnInfos(sceneName);
+		IEnumerable<GearSpawnInfo>? sceneGearSpawnInfos = GetSpawnInfos(sceneName);
 		if (sceneGearSpawnInfos == null)
 		{
-			return new GearItem[0];
+			return Array.Empty<GearItem>();
 		}
 
-		List<GearItem> spawnedItems = new List<GearItem>();
+		List<GearItem> spawnedItems = new();
 
 		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
 		{
@@ -97,7 +90,7 @@ internal static class GearSpawnManager
 
 			if (prefab == null)
 			{
-				MelonLogger.Warning("Could not find prefab '{0}' to spawn in scene '{1}'.", eachGearSpawnInfo.PrefabName, sceneName);
+				GearSpawnerMod.Logger.Warning($"Could not find prefab '{eachGearSpawnInfo.PrefabName}' to spawn in scene '{sceneName}'.");
 				continue;
 			}
 

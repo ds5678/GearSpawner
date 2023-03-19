@@ -17,11 +17,11 @@ public static class SpawnTagManager
 		string tagToLower = tag.ToLowerInvariant();
 		if (tagToLower == "none")
 		{
-			MelonLogger.Error("The spawn tag 'None' is reserved for GearSpawner internal workings.");
+			GearSpawnerMod.Logger.Error("The spawn tag 'None' is reserved for GearSpawner internal workings.");
 		}
 		else if (taggedHandlers.ContainsKey(tagToLower))
 		{
-			MelonLogger.Error("Spawn tag already registered. Overwriting...");
+			GearSpawnerMod.Logger.Error($"Spawn tag {tag} already registered. Overwriting...");
 			taggedHandlers[tagToLower] = handler;
 		}
 		else

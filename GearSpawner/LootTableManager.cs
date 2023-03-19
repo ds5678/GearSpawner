@@ -6,21 +6,22 @@ namespace GearSpawner;
 [HarmonyPatch]
 internal static class LootTableManager
 {
-	private static Dictionary<string, List<LootTableEntry>> lootTableEntries = new Dictionary<string, List<LootTableEntry>>();
+	private static readonly Dictionary<string, List<LootTableEntry>> lootTableEntries = new();
 
 	internal static void AddLootTableEntry(string lootTable, LootTableEntry entry)
 	{
 		string normalizedLootTableName = GetNormalizedLootTableName(lootTable);
 
-		if (!lootTableEntries.ContainsKey(normalizedLootTableName))
+		if (!lootTableEntries.TryGetValue(normalizedLootTableName, out List<LootTableEntry>? entryList))
 		{
-			lootTableEntries.Add(normalizedLootTableName, new List<LootTableEntry>());
+			entryList = new();
+			lootTableEntries.Add(normalizedLootTableName, entryList);
 		}
 
-		lootTableEntries[normalizedLootTableName].Add(entry.Normalize());
+		entryList.Add(entry.Normalize());
 	}
 
-	internal static bool ConfigureLootTableData(LootTableData lootTableData)
+	internal static bool ConfigureLootTableData(LootTableData? lootTableData)
 	{
 		bool tableChanged = false;
 		if (lootTableData == null)
@@ -28,15 +29,16 @@ internal static class LootTableManager
 			return false;
 		}
 
-		List<LootTableEntry> entries;
-		if (lootTableEntries.TryGetValue(lootTableData.name.ToLowerInvariant(), out entries))
+		if (lootTableEntries.TryGetValue(lootTableData.name.ToLowerInvariant(), out List<LootTableEntry>? entries))
 		{
 
 			foreach (LootTableEntry entry in entries)
 			{
-				LootTableItemReference itemRef = new();
-				itemRef.m_GearItem = new AssetReferenceGearItem(entry.PrefabName);
-				itemRef.m_Weight = entry.Weight;
+				LootTableItemReference itemRef = new()
+				{
+					m_GearItem = new AssetReferenceGearItem(entry.PrefabName),
+					m_Weight = entry.Weight
+				};
 
 				if (!lootTableData.m_BaseLoot.Contains(itemRef))
 				{

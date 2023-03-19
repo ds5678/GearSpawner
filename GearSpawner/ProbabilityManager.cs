@@ -57,7 +57,7 @@ internal static class ProbabilityManager
 	{
 		if (GameManager.IsStoryMode())
 		{
-			return SaveGameSystem.m_CurrentEpisode == Episode.One || SaveGameSystem.m_CurrentEpisode == Episode.Two
+			return SaveGameSystem.m_CurrentEpisode is Episode.One or Episode.Two
 				? FirearmAvailability.Rifle
 				: FirearmAvailability.All;
 		}

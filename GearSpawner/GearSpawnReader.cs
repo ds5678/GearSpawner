@@ -7,13 +7,12 @@ namespace GearSpawner;
 
 internal static class GearSpawnReader
 {
+	// language=regex
 	private const string NUMBER = @"-?\d+(?:\.\d+)?";
+	// language=regex
 	private const string VECTOR = NUMBER + @"\s*,\s*" + NUMBER + @"\s*,\s*" + NUMBER;
-
-	private static readonly Regex LOOTTABLE_ENTRY_REGEX = new Regex(
-		@"^item\s*=\s*(\w+)" +
-		@"\W+w\s*=\s*(" + NUMBER + ")$", RegexOptions.Compiled);
-
+	
+	private static readonly Regex LOOTTABLE_ENTRY_REGEX = new Regex(@"^item\s*=\s*(\w+)" + @"\W+w\s*=\s*(" + NUMBER + ")$", RegexOptions.Compiled);
 	private static readonly Regex LOOTTABLE_REGEX = new Regex(@"^loottable\s*=\s*(\w+)$", RegexOptions.Compiled);
 	private static readonly Regex SCENE_REGEX = new Regex(@"^scene\s*=\s*(\w+)$", RegexOptions.Compiled);
 	private static readonly Regex TAG_REGEX = new Regex(@"^tag\s*=\s*(\w+)$", RegexOptions.Compiled);
@@ -35,9 +34,9 @@ internal static class GearSpawnReader
 		{
 			return float.Parse(value, CultureInfo.InvariantCulture);
 		}
-		catch (System.Exception)
+		catch (Exception)
 		{
-			throw new System.ArgumentException($"Could not parse '{value}' as numeric value in line {line}.");
+			throw new ArgumentException($"Could not parse '{value}' as numeric value in line {line}.");
 		}
 	}
 
@@ -52,9 +51,9 @@ internal static class GearSpawnReader
 		{
 			return int.Parse(value);
 		}
-		catch (System.Exception)
+		catch (Exception)
 		{
-			throw new System.ArgumentException($"Could not parse '{value}' as numeric value in line {line}.");
+			throw new ArgumentException($"Could not parse '{value}' as numeric value in line {line}.");
 		}
 	}
 
@@ -68,14 +67,13 @@ internal static class GearSpawnReader
 		string[] components = value.Split(',');
 		if (components.Length != 3)
 		{
-			throw new System.ArgumentException($"A vector requires 3 components, but found {components.Length} in line '{line}'.");
+			throw new ArgumentException($"A vector requires 3 components, but found {components.Length} in line '{line}'.");
 		}
 
-		Vector3 result = new Vector3();
-		result.x = ParseFloat(components[0].Trim(), 0, line);
-		result.y = ParseFloat(components[1].Trim(), 0, line);
-		result.z = ParseFloat(components[2].Trim(), 0, line);
-		return result;
+		return new Vector3(
+			ParseFloat(components[0].Trim(), 0, line),
+			ParseFloat(components[1].Trim(), 0, line),
+			ParseFloat(components[2].Trim(), 0, line));
 	}
 
 	internal static void ProcessLines(string[] lines)
@@ -104,7 +102,7 @@ internal static class GearSpawnReader
 			if (match.Success)
 			{
 				tag = match.Groups[1].Value;
-				MelonLogger.Msg("Tag found while reading spawn file. '{0}'", tag);
+				GearSpawnerMod.Logger.Msg($"Tag found while reading spawn file. '{tag}'");
 				continue;
 			}
 

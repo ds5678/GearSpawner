@@ -1,6 +1,6 @@
 ﻿namespace GearSpawner;
 
-[System.Flags]
+[Flags]
 public enum FirearmAvailability
 {
 	None,
