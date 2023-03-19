@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using Il2Cpp;
-using MelonLoader;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -20,12 +20,7 @@ internal static class GearSpawnManager
 			gearSpawnInfos.Add(normalizedSceneName, sceneGearSpawnInfos);
 		}
 
-		sceneGearSpawnInfos.Add(gearSpawnInfo);
-	}
-
-	private static string GetNormalizedGearName(string gearName)
-	{
-		return gearName.StartsWith("GEAR_") ? gearName : "GEAR_" + gearName;
+		sceneGearSpawnInfos.Add(gearSpawnInfo.NormalizePrefabName());
 	}
 
 	private static string GetNormalizedSceneName(string sceneName) => sceneName.ToLowerInvariant();
@@ -52,16 +47,18 @@ internal static class GearSpawnManager
 		}
 
 		string sceneName = GameManager.m_ActiveScene;
-		GearSpawnerMod.Logger.Msg($"Spawning items for scene '{sceneName}' ...");
-		System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-		stopwatch.Start();
 
-		GearItem[] spawnedItems = SpawnGearForScene(GetNormalizedSceneName(sceneName));
+		SpawnManager.InvokeStartSpawningEvent(sceneName);
+
+		GearSpawnerMod.Logger.Msg($"Spawning items for scene '{sceneName}' ...");
+		Stopwatch stopwatch = Stopwatch.StartNew();
+
+		IReadOnlyList<GearItem> spawnedItems = SpawnGearForScene(GetNormalizedSceneName(sceneName));
 
 		stopwatch.Stop();
-		GearSpawnerMod.Logger.Msg($"Spawned '{ProbabilityManager.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
+		GearSpawnerMod.Logger.Msg($"Spawned '{GameModes.GetDifficultyLevel()}' items for scene '{sceneName}' in {stopwatch.ElapsedMilliseconds} ms");
 
-		SpawnManager.InvokeEvent(spawnedItems);
+		SpawnManager.InvokeFinishSpawningEvent(spawnedItems);
 	}
 
 	internal static bool IsNonGameScene()
@@ -73,7 +70,7 @@ internal static class GearSpawnManager
 	/// Spawns the items into the scene. However, this can be overwritten by deserialization
 	/// </summary>
 	/// <param name="sceneName"></param>
-	private static GearItem[] SpawnGearForScene(string sceneName)
+	private static IReadOnlyList<GearItem> SpawnGearForScene(string sceneName)
 	{
 		IEnumerable<GearSpawnInfo>? sceneGearSpawnInfos = GetSpawnInfos(sceneName);
 		if (sceneGearSpawnInfos == null)
@@ -81,37 +78,56 @@ internal static class GearSpawnManager
 			return Array.Empty<GearItem>();
 		}
 
+		DifficultyLevel difficultyLevel = GameModes.GetDifficultyLevel();
+		FirearmAvailability firearmAvailability = GameModes.GetFirearmAvailability();
+
 		List<GearItem> spawnedItems = new();
 
-		foreach (GearSpawnInfo eachGearSpawnInfo in sceneGearSpawnInfos)
+		foreach (GearSpawnInfo gearSpawnInfo in sceneGearSpawnInfos)
 		{
-			string normalizedGearName = GetNormalizedGearName(eachGearSpawnInfo.PrefabName);
-			GameObject? prefab = Addressables.LoadAssetAsync<GameObject>(normalizedGearName).WaitForCompletion();
-
-			if (prefab == null)
+			if (ShouldSpawn(difficultyLevel, firearmAvailability, gearSpawnInfo))
 			{
-				GearSpawnerMod.Logger.Warning($"Could not find prefab '{eachGearSpawnInfo.PrefabName}' to spawn in scene '{sceneName}'.");
-				continue;
-			}
-
-			float spawnProbability = ProbabilityManager.GetAdjustedProbability(eachGearSpawnInfo);
-			if (RandomUtils.RollChance(spawnProbability))
-			{
-				GameObject gear = UnityEngine.Object.Instantiate(prefab, eachGearSpawnInfo.Position, eachGearSpawnInfo.Rotation).Cast<GameObject>();
-				gear.name = prefab.name;
-				DisableObjectForXPMode xpmode = gear.GetComponent<DisableObjectForXPMode>();
-				if (xpmode != null)
+				GameObject? gear = SpawnGear(sceneName, gearSpawnInfo);
+				if (gear != null)
 				{
-					UnityEngine.Object.Destroy(xpmode);
+					spawnedItems.Add(gear.GetComponent<GearItem>());
 				}
-
-				spawnedItems.Add(gear.GetComponent<GearItem>());
 			}
 		}
-		return spawnedItems.ToArray();
+		return spawnedItems;
 	}
 
-	// patch the scenes for loose items as they load
+	private static bool ShouldSpawn(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
+	{
+		return Settings.Instance.alwaysSpawnItems
+			|| SpawnTagManager.GetHandler(gearSpawnInfo.Tag).ShouldSpawn(difficultyLevel, firearmAvailability, gearSpawnInfo);
+	}
+
+	private static GameObject? SpawnGear(string sceneName, GearSpawnInfo gearSpawnInfo)
+	{
+		GameObject? prefab = Addressables.LoadAssetAsync<GameObject>(gearSpawnInfo.PrefabName).WaitForCompletion();
+
+		if (prefab == null)
+		{
+			GearSpawnerMod.Logger.Warning($"Could not find prefab '{gearSpawnInfo.PrefabName}' to spawn in scene '{sceneName}'.");
+			return null;
+		}
+
+		GameObject gear = UnityEngine.Object.Instantiate(prefab, gearSpawnInfo.Position, gearSpawnInfo.Rotation).Cast<GameObject>();
+		gear.name = prefab.name;
+		EnableObjectForXPMode(gear);
+		return gear;
+	}
+
+	private static void EnableObjectForXPMode(GameObject gameObject)
+	{
+		DisableObjectForXPMode xpmode = gameObject.GetComponent<DisableObjectForXPMode>();
+		if (xpmode != null)
+		{
+			UnityEngine.Object.Destroy(xpmode);
+		}
+	}
+
 	/// <summary>
 	/// Other than GameManager.SetAudioModeForLoadedScene(), QualitySettingsManager.ApplyCurrentQualitySettings is the last method called within GameManager.Update() before save file saving and loading occur. They only get called after the loading panel has closed, and they each only get called once. If GameManager.SetAudioModeForLoadedScene() was not inlined, it would be used instead.
 	/// </summary>
@@ -119,6 +135,7 @@ internal static class GearSpawnManager
 	[HarmonyPatch(typeof(QualitySettingsManager), nameof(QualitySettingsManager.ApplyCurrentQualitySettings))]
 	internal static void GameManager_ApplyCurrentQualitySettings()
 	{
+		//patch the scenes for loose items as they load
 		PrepareScene();
 	}
 }

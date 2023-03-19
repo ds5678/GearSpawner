@@ -3,18 +3,8 @@ using Il2CppTLD.Gameplay.Tunable;
 
 namespace GearSpawner;
 
-internal static class ProbabilityManager
+internal static class GameModes
 {
-	internal static float GetAdjustedProbability(GearSpawnInfo gearSpawnInfo)
-	{
-		if (Settings.Instance.alwaysSpawnItems)
-		{
-			return 100f; //overrides everything else
-		}
-
-		return SpawnTagManager.GetHandler(gearSpawnInfo.Tag).GetProbability(GetDifficultyLevel(), GetFirearmAvailability(), gearSpawnInfo);
-	}
-
 	public static DifficultyLevel GetDifficultyLevel()
 	{
 		if (GameManager.IsStoryMode())

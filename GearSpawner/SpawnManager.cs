@@ -5,7 +5,8 @@ namespace GearSpawner;
 
 public static class SpawnManager
 {
-	public static event Action<GearItem[]>? OnSpawnGearItems;
+	public static event Action<string>? OnStartSpawning;
+	public static event Action<IReadOnlyList<GearItem>>? OnFinishSpawning;
 
 	public static void ParseSpawnInformation(string text)
 	{
@@ -17,5 +18,7 @@ public static class SpawnManager
 
 	public static void AddGearSpawnInfo(string sceneName, GearSpawnInfo gearSpawnInfo) => GearSpawnManager.AddGearSpawnInfo(sceneName, gearSpawnInfo);
 
-	internal static void InvokeEvent(GearItem[] items) => OnSpawnGearItems?.Invoke(items);
+	internal static void InvokeFinishSpawningEvent(IReadOnlyList<GearItem> items) => OnFinishSpawning?.Invoke(items);
+
+	internal static void InvokeStartSpawningEvent(string sceneName) => OnStartSpawning?.Invoke(sceneName);
 }

@@ -5,14 +5,14 @@ namespace GearSpawner;
 public static class SpawnTagManager
 {
 	private static readonly DefaultGearSpawnHandler defaultHandler = new();
-	private static readonly Dictionary<string, IGearSpawnHandler> taggedHandlers = new();
+	private static readonly Dictionary<string, GearSpawnHandler> taggedHandlers = new();
 
 	public static void AddFunction(string tag, Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float> function)
 	{
 		AddHandler(tag, new FunctionGearSpawnHandler(function));
 	}
 
-	public static void AddHandler(string tag, IGearSpawnHandler handler)
+	public static void AddHandler(string tag, GearSpawnHandler handler)
 	{
 		string tagToLower = tag.ToLowerInvariant();
 		if (tagToLower == "none")
@@ -30,9 +30,9 @@ public static class SpawnTagManager
 		}
 	}
 
-	internal static IGearSpawnHandler GetHandler(string tag)
+	internal static GearSpawnHandler GetHandler(string tag)
 	{
-		return taggedHandlers.TryGetValue(tag, out IGearSpawnHandler? handler)
+		return taggedHandlers.TryGetValue(tag, out GearSpawnHandler? handler)
 			? handler
 			: defaultHandler;
 	}

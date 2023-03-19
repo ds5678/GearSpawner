@@ -1,6 +1,6 @@
 ﻿namespace GearSpawner;
 
-internal sealed class FunctionGearSpawnHandler : IGearSpawnHandler
+internal sealed class FunctionGearSpawnHandler : ProbabilisticGearSpawnHandler
 {
 	private readonly Func<DifficultyLevel, FirearmAvailability, GearSpawnInfo, float> function;
 
@@ -9,7 +9,7 @@ internal sealed class FunctionGearSpawnHandler : IGearSpawnHandler
 		this.function = function ?? throw new ArgumentNullException(nameof(function));
 	}
 
-	public float GetProbability(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
+	public override float GetProbability(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
 	{
 		return function.Invoke(difficultyLevel, firearmAvailability, gearSpawnInfo);
 	}

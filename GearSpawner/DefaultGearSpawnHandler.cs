@@ -2,9 +2,9 @@
 
 namespace GearSpawner;
 
-public class DefaultGearSpawnHandler : IGearSpawnHandler
+public class DefaultGearSpawnHandler : ProbabilisticGearSpawnHandler
 {
-	public virtual float GetProbability(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
+	public override float GetProbability(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
 	{
 		return GetAdjustedProbability(difficultyLevel, gearSpawnInfo.SpawnChance);
 	}
