@@ -11,8 +11,8 @@ public abstract class ProbabilisticGearSpawnHandler : GearSpawnHandler
 	/// <returns>The percent probability of the item being spawned.</returns>
 	public abstract float GetProbability(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo);
 
-	public override bool ShouldSpawn(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
+	public sealed override bool ShouldSpawn(DifficultyLevel difficultyLevel, FirearmAvailability firearmAvailability, GearSpawnInfo gearSpawnInfo)
 	{
-		return RandomUtils.RollChance(GetProbability(difficultyLevel, firearmAvailability, gearSpawnInfo));
+		return RollChance(GetProbability(difficultyLevel, firearmAvailability, gearSpawnInfo));
 	}
 }
